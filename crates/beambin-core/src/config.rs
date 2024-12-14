@@ -86,6 +86,9 @@ pub struct Config {
     /// A list of external hosts that are blocked
     #[serde(default)]
     pub blocked_hosts: Vec<String>,
+    /// A list of tokens that can be stored as a cookie for moderators to use to authorize moderator actions
+    #[serde(default)]
+    pub tokens: Vec<String>,
     // ...
     /// The slug of the server's information post
     #[serde(default)]
@@ -120,6 +123,7 @@ impl Config {
             host: String::new(),
             blocked_hosts: Vec::new(),
             real_ip_header: None,
+            tokens: Vec::new(),
             info_post_slug: String::new(),
             view_password: true,
             post_ownership: true,
@@ -140,6 +144,7 @@ impl Default for Config {
             host: String::new(),
             blocked_hosts: Vec::new(),
             real_ip_header: None,
+            tokens: Vec::new(),
             info_post_slug: String::new(),
             view_password: false,
             post_ownership: false,

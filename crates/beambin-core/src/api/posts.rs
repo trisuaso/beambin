@@ -5,6 +5,7 @@ use crate::model::{
 
 use crate::database::Database;
 use axum::http::{HeaderMap, HeaderValue};
+use axum_extra::extract::CookieJar;
 use databeam::DefaultReturn;
 
 use axum::response::IntoResponse;
@@ -92,11 +93,26 @@ async fn clone_request(
 
 /// Delete an existing post (`/api/v1/posts/:slug/delete`)
 async fn delete_request(
+    jar: CookieJar,
     State(database): State<Database>,
     Path(slug): Path<String>,
     Json(props): Json<DeletePost>,
 ) -> impl IntoResponse {
-    match database.delete_post(slug, props.password).await {
+    // get auth token
+    let auth_token = match jar.get("__Secure-Token") {
+        Some(c) => c.value_trimmed().to_string(),
+        None => String::new(),
+    };
+
+    // ...
+    match database
+        .delete_post(
+            slug,
+            props.password,
+            database.config.tokens.contains(&auth_token),
+        )
+        .await
+    {
         Ok(_) => Ok(Json(DefaultReturn {
             success: true,
             message: String::from("Post deleted"),
@@ -108,11 +124,18 @@ async fn delete_request(
 
 /// Edit an existing post (`/api/v1/posts/:slug/edit`)
 async fn edit_request(
+    jar: CookieJar,
     headers: HeaderMap,
     State(database): State<Database>,
     Path(slug): Path<String>,
     Json(props): Json<EditPost>,
 ) -> impl IntoResponse {
+    // get auth token
+    let auth_token = match jar.get("__Secure-Token") {
+        Some(c) => c.value_trimmed().to_string(),
+        None => String::new(),
+    };
+
     // get real ip
     let real_ip = if let Some(ref real_ip_header) = database.config.real_ip_header {
         headers
@@ -130,6 +153,7 @@ async fn edit_request(
         .edit_post(
             slug,
             real_ip,
+            database.config.tokens.contains(&auth_token),
             props.password,
             props.new_content,
             props.new_slug,
@@ -148,12 +172,25 @@ async fn edit_request(
 
 /// Edit an existing post's context (`/api/v1/posts/:slug/context`)
 async fn edit_post_context(
+    jar: CookieJar,
     State(database): State<Database>,
     Path(slug): Path<String>,
     Json(props): Json<EditContext>,
 ) -> impl IntoResponse {
+    // get auth token
+    let auth_token = match jar.get("__Secure-Token") {
+        Some(c) => c.value_trimmed().to_string(),
+        None => String::new(),
+    };
+
+    // ...
     match database
-        .edit_post_context(slug, props.password, props.context)
+        .edit_post_context(
+            slug,
+            database.config.tokens.contains(&auth_token),
+            props.password,
+            props.context,
+        )
         .await
     {
         Ok(_) => Ok(Json(DefaultReturn {

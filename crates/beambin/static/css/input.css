@@ -93,14 +93,12 @@ a.button[disabled] {
     @apply opacity-50 cursor-not-allowed;
 }
 
-button.green,
-a.button.green {
-    @apply !text-emerald-800 dark:!text-emerald-300;
+.green {
+    @apply !text-emerald-800 dark:!text-emerald-300 !important;
 }
 
-button.red,
-a.button.red {
-    @apply !text-red-800 dark:!text-red-300;
+.red {
+    @apply !text-red-800 dark:!text-red-300 !important;
 }
 
 /* typography */
@@ -197,6 +195,10 @@ menu {
     list-style: inside;
     margin: 0 0 1rem 0;
     padding: 0 0 0 40px;
+}
+
+ul.small {
+    @apply pl-6;
 }
 
 strong,

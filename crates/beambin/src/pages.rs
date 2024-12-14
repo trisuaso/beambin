@@ -6,6 +6,7 @@ use axum::{
     Router,
 };
 
+use axum_extra::extract::CookieJar;
 use serde::{Serialize, Deserialize};
 
 use beambin_core::{
@@ -153,13 +154,22 @@ pub async fn view_post_request(
 struct EditorTemplate {
     post: Post,
     passwordless: bool,
+    is_admin: bool,
 }
 
 pub async fn editor_request(
+    jar: CookieJar,
     Path(slug): Path<String>,
     State(database): State<Database>,
     Query(query_params): Query<PostViewQuery>,
 ) -> impl IntoResponse {
+    // get auth token
+    let auth_token = match jar.get("__Secure-Token") {
+        Some(c) => c.value_trimmed().to_string(),
+        None => String::new(),
+    };
+
+    // ...
     match database.get_post(slug).await {
         Ok(p) => {
             // check for view password
@@ -185,6 +195,7 @@ pub async fn editor_request(
                 EditorTemplate {
                     post: p,
                     passwordless: false,
+                    is_admin: database.config.tokens.contains(&auth_token),
                 }
                 .render()
                 .unwrap(),
@@ -205,15 +216,24 @@ pub async fn editor_request(
 struct ConfigEditorTemplate {
     post: Post,
     post_context: String,
-    auth_user: String,
+    auth_token: String,
     passwordless: bool,
+    is_admin: bool,
 }
 
 pub async fn config_editor_request(
+    jar: CookieJar,
     Path(slug): Path<String>,
     State(database): State<Database>,
     Query(query_params): Query<PostViewQuery>,
 ) -> impl IntoResponse {
+    // get auth token
+    let auth_token = match jar.get("__Secure-Token") {
+        Some(c) => c.value_trimmed().to_string(),
+        None => String::new(),
+    };
+
+    // ...
     match database.get_post(slug).await {
         Ok(p) => {
             // check for view password
@@ -250,7 +270,8 @@ pub async fn config_editor_request(
                             )
                         }
                     },
-                    auth_user: String::new(),
+                    is_admin: database.config.tokens.contains(&auth_token),
+                    auth_token,
                     passwordless: false,
                 }
                 .render()

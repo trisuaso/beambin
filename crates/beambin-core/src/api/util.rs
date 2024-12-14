@@ -2,8 +2,9 @@ use crate::database::Database;
 use axum::{
     body::Body,
     extract::{Query, State},
+    http::HeaderMap,
     response::IntoResponse,
-    routing::get,
+    routing::{get, post},
     Router,
 };
 use serde::{Deserialize, Serialize};
@@ -11,6 +12,7 @@ use std::{fs::File, io::Read};
 
 pub fn routes(database: Database) -> Router {
     Router::new()
+        .route("/token", post(set_token_request))
         .route("/ext/image", get(external_image_request))
         // ...
         .with_state(database.clone())
@@ -114,4 +116,33 @@ pub async fn external_image_request(
             )),
         ),
     }
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct SetToken {
+    #[serde(default)]
+    pub token: String,
+}
+
+/// Set a token
+pub async fn set_token_request(Query(props): Query<SetToken>) -> impl IntoResponse {
+    (
+        {
+            let mut headers = HeaderMap::new();
+
+            headers.insert(
+                "Set-Cookie",
+                format!(
+                    "__Secure-Token={}; SameSite=Lax; Secure; Path=/; HostOnly=true; HttpOnly=true; Max-Age={}",
+                    props.token,
+                    60* 60 * 24 * 365
+                )
+                .parse()
+                .unwrap(),
+            );
+
+            headers
+        },
+        "Language changed",
+    )
 }

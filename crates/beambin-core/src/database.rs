@@ -364,7 +364,12 @@ impl Database {
     /// # Arguments
     /// * `slug` - the post to delete
     /// * `password` - the post's edit password
-    pub async fn delete_post(&self, mut slug: String, password: String) -> Result<()> {
+    pub async fn delete_post(
+        &self,
+        mut slug: String,
+        password: String,
+        skip_password_check: bool,
+    ) -> Result<()> {
         slug = idna::punycode::encode_str(&slug).unwrap().to_lowercase();
 
         if slug.ends_with("-") {
@@ -378,8 +383,10 @@ impl Database {
         };
 
         // check password
-        if utility::hash(password) != existing.password {
-            return Err(DatabaseError::PasswordIncorrect);
+        if !skip_password_check {
+            if utility::hash(password) != existing.password {
+                return Err(DatabaseError::PasswordIncorrect);
+            }
         }
 
         // delete post view count
@@ -443,6 +450,7 @@ impl Database {
         &self,
         mut slug: String,
         ip: String,
+        skip_password_check: bool,
         password: String,
         new_content: String,
         mut new_slug: String,
@@ -461,10 +469,7 @@ impl Database {
         };
 
         // check password
-        // let mut skip_password_check: bool = false;
-        let skip_password_check: bool = false;
-
-        if skip_password_check == false {
+        if !skip_password_check {
             if utility::hash(password) != existing.password {
                 return Err(DatabaseError::PasswordIncorrect);
             }
@@ -547,6 +552,7 @@ impl Database {
     pub async fn edit_post_context(
         &self,
         mut slug: String,
+        skip_password_check: bool,
         password: String,
         context: PostContext,
     ) -> Result<()> {
@@ -563,10 +569,7 @@ impl Database {
         };
 
         // check password
-        // let mut skip_password_check: bool = false;
-        let skip_password_check: bool = false;
-
-        if skip_password_check == false {
+        if !skip_password_check {
             if utility::hash(password) != existing.password {
                 return Err(DatabaseError::PasswordIncorrect);
             }
