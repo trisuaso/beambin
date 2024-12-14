@@ -13,10 +13,21 @@ flex; flex-direction: column;"{% endblock %} {% block content %}
     {% endif %}
 
     <!-- toolbar -->
-    <div class="flex">
-        <a class="button tab secondary" href="/{{ post.slug }}/edit">Text</a>
-        <button class="button tab secondary" disabled>Preview</button>
-        <button class="button tab">Config</button>
+    <div class="flex justify-between">
+        <div class="flex">
+            <a class="button tab secondary" href="/{{ post.slug }}/edit"
+                >Text</a
+            >
+            <button class="button tab secondary" disabled>Preview</button>
+            <button class="button tab">Config</button>
+        </div>
+
+        <button
+            class="tab secondary opacity-75"
+            onclick="document.getElementById('token_login').showModal()"
+        >
+            Mode
+        </button>
     </div>
 
     <!-- editor -->
@@ -45,15 +56,6 @@ flex; flex-direction: column;"{% endblock %} {% block content %}
                     {% endif %}
                 </div>
                 {% endfor %}
-
-                <a
-                    class="w-max"
-                    href="#"
-                    onclick="document.getElementById('token_login').showModal()"
-                    data-turbo="false"
-                >
-                    More
-                </a>
             </div>
 
             <hr />
