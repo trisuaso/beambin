@@ -13,13 +13,13 @@
                     lineWrapping: true,
                     autoCloseBrackets: true,
                     autofocus: true,
-                    viewportMargin: Infinity,
-                    lineWrapping: true,
+                    viewportMargin: Number.POSITIVE_INFINITY,
                     inputStyle: "contenteditable",
                     highlightFormatting: false,
                     fencedCodeBlockHighlighting: false,
                     xml: false,
                     smartIndent: false,
+                    spellcheck: true,
                     extraKeys: {
                         Home: "goLineLeft",
                         End: "goLineRight",
@@ -88,7 +88,7 @@
         let stored_timeout = null;
 
         bind_to.addEventListener("keyup", (event) => {
-            let value = event.target.value.trim();
+            const value = event.target.value.trim();
 
             // make sure value isn't too short
             if (value.length < 1) {
@@ -103,7 +103,7 @@
 
             stored_timeout = setTimeout(async () => {
                 // fetch url
-                const exists = await (await fetch(`/api/v1/posts/${value}`)).ok;
+                const exists = (await fetch(`/api/v1/posts/${value}`)).ok;
 
                 if (!exists) {
                     // paste does not exist

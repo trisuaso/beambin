@@ -1,6 +1,7 @@
 use crate::model::{CreatePost, DatabaseError, Post, PostContext, ClonePost, ViewMode};
 use crate::config::Config;
 
+use authbeam::model::Profile;
 use reqwest::Client as HttpClient;
 
 use databeam::utility;
@@ -12,15 +13,21 @@ pub type Result<T> = std::result::Result<T, DatabaseError>;
 #[derive(Clone)]
 pub struct Database {
     pub base: databeam::StarterDatabase,
+    pub auth: authbeam::Database,
     pub config: Config,
     pub http: HttpClient,
 }
 
 impl Database {
     /// Create a new [`Database`]
-    pub async fn new(database_options: databeam::DatabaseOpts, config: Config) -> Self {
+    pub async fn new(
+        database_options: databeam::DatabaseOpts,
+        auth: authbeam::Database,
+        config: Config,
+    ) -> Self {
         Self {
             base: databeam::StarterDatabase::new(database_options).await,
+            auth,
             config,
             http: HttpClient::new(),
         }
@@ -368,7 +375,7 @@ impl Database {
         &self,
         mut slug: String,
         password: String,
-        skip_password_check: bool,
+        user: Option<Box<Profile>>,
     ) -> Result<()> {
         slug = idna::punycode::encode_str(&slug).unwrap().to_lowercase();
 
@@ -383,6 +390,36 @@ impl Database {
         };
 
         // check password
+        let mut skip_password_check = false;
+
+        if let Some(ref ua) = user {
+            // check permission
+            let group = match self.auth.get_group_by_id(ua.group).await {
+                Ok(g) => g,
+                Err(_) => return Err(DatabaseError::Other),
+            };
+
+            if !group
+                .permissions
+                .contains(&authbeam::model::Permission::Manager)
+            {
+                return Err(DatabaseError::NotAllowed);
+            } else {
+                if let Err(_) = self
+                    .auth
+                    .audit(
+                        ua.id.to_owned(),
+                        format!("Deleted a post: {}", existing.slug),
+                    )
+                    .await
+                {
+                    return Err(DatabaseError::Other);
+                }
+
+                skip_password_check = true
+            }
+        }
+
         if !skip_password_check {
             if utility::hash(password) != existing.password {
                 return Err(DatabaseError::PasswordIncorrect);
@@ -450,11 +487,11 @@ impl Database {
         &self,
         mut slug: String,
         ip: String,
-        skip_password_check: bool,
         password: String,
         new_content: String,
         mut new_slug: String,
         mut new_password: String,
+        user: Option<Box<Profile>>,
     ) -> Result<()> {
         slug = idna::punycode::encode_str(&slug).unwrap().to_lowercase();
 
@@ -469,6 +506,36 @@ impl Database {
         };
 
         // check password
+        let mut skip_password_check = false;
+
+        if let Some(ref ua) = user {
+            // check permission
+            let group = match self.auth.get_group_by_id(ua.group).await {
+                Ok(g) => g,
+                Err(_) => return Err(DatabaseError::Other),
+            };
+
+            if !group
+                .permissions
+                .contains(&authbeam::model::Permission::Manager)
+            {
+                return Err(DatabaseError::NotAllowed);
+            } else {
+                if let Err(_) = self
+                    .auth
+                    .audit(
+                        ua.id.to_owned(),
+                        format!("Edited a post: {}", existing.slug),
+                    )
+                    .await
+                {
+                    return Err(DatabaseError::Other);
+                }
+
+                skip_password_check = true
+            }
+        }
+
         if !skip_password_check {
             if utility::hash(password) != existing.password {
                 return Err(DatabaseError::PasswordIncorrect);
@@ -552,9 +619,9 @@ impl Database {
     pub async fn edit_post_context(
         &self,
         mut slug: String,
-        skip_password_check: bool,
         password: String,
         context: PostContext,
+        user: Option<Box<Profile>>,
     ) -> Result<()> {
         slug = idna::punycode::encode_str(&slug).unwrap().to_lowercase();
 
@@ -569,6 +636,36 @@ impl Database {
         };
 
         // check password
+        let mut skip_password_check = false;
+
+        if let Some(ref ua) = user {
+            // check permission
+            let group = match self.auth.get_group_by_id(ua.group).await {
+                Ok(g) => g,
+                Err(_) => return Err(DatabaseError::Other),
+            };
+
+            if !group
+                .permissions
+                .contains(&authbeam::model::Permission::Manager)
+            {
+                return Err(DatabaseError::NotAllowed);
+            } else {
+                if let Err(_) = self
+                    .auth
+                    .audit(
+                        ua.id.to_owned(),
+                        format!("Edited a post's context: {}", existing.slug),
+                    )
+                    .await
+                {
+                    return Err(DatabaseError::Other);
+                }
+
+                skip_password_check = true
+            }
+        }
+
         if !skip_password_check {
             if utility::hash(password) != existing.password {
                 return Err(DatabaseError::PasswordIncorrect);

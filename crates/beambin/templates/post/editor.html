@@ -1,10 +1,10 @@
 {% extends "./base.html" %} {% block title %}Editing "{{ post.slug }}" – {{
-base.name }}{% endblock %} {% block mainstuff %}style="height: 100%; display:
+config.name }}{% endblock %} {% block mainstuff %}style="height: 100%; display:
 flex; flex-direction: column;"{% endblock %}{% block content %}
 <div class="flex flex-col w-full h-full">
-    {% if is_admin %}
+    {% if is_powerful %}
     <ul class="green small">
-        <li>Admin enabled</li>
+        <li>Editing as admin</li>
     </ul>
     {% endif %}
 

@@ -98,21 +98,20 @@ async fn delete_request(
     Path(slug): Path<String>,
     Json(props): Json<DeletePost>,
 ) -> impl IntoResponse {
-    // get auth token
-    let auth_token = match jar.get("__Secure-Token") {
-        Some(c) => c.value_trimmed().to_string(),
-        None => String::new(),
+    let auth_user = match jar.get("__Secure-Token") {
+        Some(c) => match database
+            .auth
+            .get_profile_by_unhashed(c.value_trimmed().to_string())
+            .await
+        {
+            Ok(ua) => Some(ua),
+            Err(_) => None,
+        },
+        None => None,
     };
 
     // ...
-    match database
-        .delete_post(
-            slug,
-            props.password,
-            database.config.tokens.contains(&auth_token),
-        )
-        .await
-    {
+    match database.delete_post(slug, props.password, auth_user).await {
         Ok(_) => Ok(Json(DefaultReturn {
             success: true,
             message: String::from("Post deleted"),
@@ -130,10 +129,16 @@ async fn edit_request(
     Path(slug): Path<String>,
     Json(props): Json<EditPost>,
 ) -> impl IntoResponse {
-    // get auth token
-    let auth_token = match jar.get("__Secure-Token") {
-        Some(c) => c.value_trimmed().to_string(),
-        None => String::new(),
+    let auth_user = match jar.get("__Secure-Token") {
+        Some(c) => match database
+            .auth
+            .get_profile_by_unhashed(c.value_trimmed().to_string())
+            .await
+        {
+            Ok(ua) => Some(ua),
+            Err(_) => None,
+        },
+        None => None,
     };
 
     // get real ip
@@ -153,11 +158,11 @@ async fn edit_request(
         .edit_post(
             slug,
             real_ip,
-            database.config.tokens.contains(&auth_token),
             props.password,
             props.new_content,
             props.new_slug,
             props.new_password,
+            auth_user,
         )
         .await
     {
@@ -177,20 +182,21 @@ async fn edit_post_context(
     Path(slug): Path<String>,
     Json(props): Json<EditContext>,
 ) -> impl IntoResponse {
-    // get auth token
-    let auth_token = match jar.get("__Secure-Token") {
-        Some(c) => c.value_trimmed().to_string(),
-        None => String::new(),
+    let auth_user = match jar.get("__Secure-Token") {
+        Some(c) => match database
+            .auth
+            .get_profile_by_unhashed(c.value_trimmed().to_string())
+            .await
+        {
+            Ok(ua) => Some(ua),
+            Err(_) => None,
+        },
+        None => None,
     };
 
     // ...
     match database
-        .edit_post_context(
-            slug,
-            database.config.tokens.contains(&auth_token),
-            props.password,
-            props.context,
-        )
+        .edit_post_context(slug, props.password, props.context, auth_user)
         .await
     {
         Ok(_) => Ok(Json(DefaultReturn {

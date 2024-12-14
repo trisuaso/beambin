@@ -34,6 +34,10 @@ align.right {
     @apply text-right;
 }
 
+.h-captcha {
+    @apply grid place-items-center;
+}
+
 /* card */
 .card {
     @apply bg-neutral-200 dark:bg-neutral-800;

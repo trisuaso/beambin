@@ -10,6 +10,8 @@ use axum_extra::extract::CookieJar;
 use serde::{Serialize, Deserialize};
 
 use beambin_core::{
+    auth::{Permission, Profile},
+    config::Config,
     database::Database,
     model::{DatabaseError, Post},
 };
@@ -17,25 +19,36 @@ use rainbeam_shared::ui::render_markdown as md;
 
 pub fn routes(database: Database) -> Router {
     Router::new()
-        .route("/:url/edit/config", get(config_editor_request))
-        .route("/:url/edit", get(editor_request))
-        .route("/:url", get(view_post_request))
-        .route("/api/v0/render", post(render_markdown))
+        .route("/", get(homepage))
+        // post
+        .route("/:slug/edit/config", get(config_editor_request))
+        .route("/:slug/edit", get(editor_request))
+        .route("/:slug", get(view_post_request))
         // ...
+        .route("/api/v0/render", post(render_markdown))
         .with_state(database)
 }
 
 #[derive(Template)]
 #[template(path = "homepage.html")]
-struct HomepageTemplate {}
+struct HomepageTemplate {
+    config: Config,
+}
 
-pub async fn homepage() -> impl IntoResponse {
-    Html(HomepageTemplate {}.render().unwrap())
+pub async fn homepage(State(database): State<Database>) -> impl IntoResponse {
+    Html(
+        HomepageTemplate {
+            config: database.config,
+        }
+        .render()
+        .unwrap(),
+    )
 }
 
 #[derive(Template)]
 #[template(path = "post/view.html")]
 struct PostViewTemplate {
+    config: Config,
     post: Post,
     rendered: String,
     title: String,
@@ -52,12 +65,14 @@ pub struct PostViewQuery {
 #[derive(Template)]
 #[template(path = "post/password_prompt.html")]
 struct PostPasswordTemplate {
+    config: Config,
     post: Post,
 }
 
 #[derive(Template)]
 #[template(path = "error.html")]
 struct ErrorViewTemplate {
+    config: Config,
     error: String,
 }
 
@@ -75,12 +90,26 @@ pub async fn view_post_request(
                         if !p.context.view_password.is_empty()
                             && (query_params.view_password != p.context.view_password)
                         {
-                            return Html(PostPasswordTemplate { post: p }.render().unwrap());
+                            return Html(
+                                PostPasswordTemplate {
+                                    config: database.config,
+                                    post: p,
+                                }
+                                .render()
+                                .unwrap(),
+                            );
                         }
                     }
                     true => {
                         if !p.context.view_password.is_empty() {
-                            return Html(PostPasswordTemplate { post: p }.render().unwrap());
+                            return Html(
+                                PostPasswordTemplate {
+                                    config: database.config,
+                                    post: p,
+                                }
+                                .render()
+                                .unwrap(),
+                            );
                         }
                     }
                 }
@@ -91,6 +120,7 @@ pub async fn view_post_request(
             if let Err(e) = database.incr_views_by_slug(p.slug.clone()).await {
                 return Html(
                     ErrorViewTemplate {
+                        config: database.config,
                         error: e.to_string(),
                     }
                     .render()
@@ -102,6 +132,7 @@ pub async fn view_post_request(
             let rendered = md(&p.content.clone());
             Html(
                 PostViewTemplate {
+                    config: database.config.clone(),
                     post: p.clone(),
                     rendered,
                     title: match p.context.title.is_empty() {
@@ -141,6 +172,7 @@ pub async fn view_post_request(
         }
         Err(e) => Html(
             ErrorViewTemplate {
+                config: database.config,
                 error: e.to_string(),
             }
             .render()
@@ -152,9 +184,10 @@ pub async fn view_post_request(
 #[derive(Template)]
 #[template(path = "post/editor.html")]
 struct EditorTemplate {
+    config: Config,
     post: Post,
     passwordless: bool,
-    is_admin: bool,
+    is_powerful: bool,
 }
 
 pub async fn editor_request(
@@ -164,9 +197,27 @@ pub async fn editor_request(
     Query(query_params): Query<PostViewQuery>,
 ) -> impl IntoResponse {
     // get auth token
-    let auth_token = match jar.get("__Secure-Token") {
-        Some(c) => c.value_trimmed().to_string(),
-        None => String::new(),
+    let auth_user = match jar.get("__Secure-Token") {
+        Some(c) => match database
+            .auth
+            .get_profile_by_unhashed(c.value_trimmed().to_string())
+            .await
+        {
+            Ok(ua) => Some(ua),
+            Err(_) => None,
+        },
+        None => None,
+    };
+
+    let is_powerful = if let Some(ref ua) = auth_user {
+        let group = match database.auth.get_group_by_id(ua.group).await {
+            Ok(g) => g,
+            Err(_) => return Html(DatabaseError::Other.to_string()),
+        };
+
+        group.permissions.contains(&Permission::Manager)
+    } else {
+        false
     };
 
     // ...
@@ -179,12 +230,26 @@ pub async fn editor_request(
                         if !p.context.view_password.is_empty()
                             && (query_params.view_password != p.context.view_password)
                         {
-                            return Html(PostPasswordTemplate { post: p }.render().unwrap());
+                            return Html(
+                                PostPasswordTemplate {
+                                    config: database.config,
+                                    post: p,
+                                }
+                                .render()
+                                .unwrap(),
+                            );
                         }
                     }
                     true => {
                         if !p.context.view_password.is_empty() {
-                            return Html(PostPasswordTemplate { post: p }.render().unwrap());
+                            return Html(
+                                PostPasswordTemplate {
+                                    config: database.config,
+                                    post: p,
+                                }
+                                .render()
+                                .unwrap(),
+                            );
                         }
                     }
                 }
@@ -193,9 +258,10 @@ pub async fn editor_request(
             // ...
             Html(
                 EditorTemplate {
+                    config: database.config,
                     post: p,
                     passwordless: false,
-                    is_admin: database.config.tokens.contains(&auth_token),
+                    is_powerful,
                 }
                 .render()
                 .unwrap(),
@@ -203,6 +269,7 @@ pub async fn editor_request(
         }
         Err(e) => Html(
             ErrorViewTemplate {
+                config: database.config,
                 error: e.to_string(),
             }
             .render()
@@ -214,11 +281,12 @@ pub async fn editor_request(
 #[derive(Template)]
 #[template(path = "post/context.html")]
 struct ConfigEditorTemplate {
+    config: Config,
+    profile: Option<Box<Profile>>,
     post: Post,
     post_context: String,
-    auth_token: String,
     passwordless: bool,
-    is_admin: bool,
+    is_powerful: bool,
 }
 
 pub async fn config_editor_request(
@@ -228,27 +296,59 @@ pub async fn config_editor_request(
     Query(query_params): Query<PostViewQuery>,
 ) -> impl IntoResponse {
     // get auth token
-    let auth_token = match jar.get("__Secure-Token") {
-        Some(c) => c.value_trimmed().to_string(),
-        None => String::new(),
+    let auth_user = match jar.get("__Secure-Token") {
+        Some(c) => match database
+            .auth
+            .get_profile_by_unhashed(c.value_trimmed().to_string())
+            .await
+        {
+            Ok(ua) => Some(ua),
+            Err(_) => None,
+        },
+        None => None,
+    };
+
+    let is_powerful = if let Some(ref ua) = auth_user {
+        let group = match database.auth.get_group_by_id(ua.group).await {
+            Ok(g) => g,
+            Err(_) => return Html(DatabaseError::Other.to_string()),
+        };
+
+        group.permissions.contains(&Permission::Manager)
+    } else {
+        false
     };
 
     // ...
     match database.get_post(slug).await {
         Ok(p) => {
             // check for view password
-            if database.config.view_password == true {
+            if (database.config.view_password == true) && !is_powerful {
                 match query_params.view_password.is_empty() {
                     false => {
                         if !p.context.view_password.is_empty()
                             && (query_params.view_password != p.context.view_password)
                         {
-                            return Html(PostPasswordTemplate { post: p }.render().unwrap());
+                            return Html(
+                                PostPasswordTemplate {
+                                    config: database.config,
+                                    post: p,
+                                }
+                                .render()
+                                .unwrap(),
+                            );
                         }
                     }
                     true => {
                         if !p.context.view_password.is_empty() {
-                            return Html(PostPasswordTemplate { post: p }.render().unwrap());
+                            return Html(
+                                PostPasswordTemplate {
+                                    config: database.config,
+                                    post: p,
+                                }
+                                .render()
+                                .unwrap(),
+                            );
                         }
                     }
                 }
@@ -257,12 +357,15 @@ pub async fn config_editor_request(
             // ...
             Html(
                 ConfigEditorTemplate {
+                    config: database.config.clone(),
+                    profile: auth_user,
                     post: p.clone(),
                     post_context: match serde_json::to_string(&p.context) {
                         Ok(m) => m,
                         Err(_) => {
                             return Html(
                                 ErrorViewTemplate {
+                                    config: database.config,
                                     error: DatabaseError::Other.to_string(),
                                 }
                                 .render()
@@ -270,9 +373,8 @@ pub async fn config_editor_request(
                             )
                         }
                     },
-                    is_admin: database.config.tokens.contains(&auth_token),
-                    auth_token,
                     passwordless: false,
+                    is_powerful,
                 }
                 .render()
                 .unwrap(),
@@ -280,6 +382,7 @@ pub async fn config_editor_request(
         }
         Err(e) => Html(
             ErrorViewTemplate {
+                config: database.config,
                 error: e.to_string(),
             }
             .render()

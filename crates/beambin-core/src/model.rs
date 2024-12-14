@@ -169,22 +169,33 @@ pub struct EditContext {
 }
 
 /// General API errors
+#[derive(Debug)]
 pub enum DatabaseError {
     PasswordIncorrect,
+    ContentTooShort,
+    ContentTooLong,
     AlreadyExists,
+    NotAllowed,
     ValueError,
     NotFound,
+    Banned,
     Other,
 }
 
 impl DatabaseError {
     pub fn to_string(&self) -> String {
-        use crate::model::DatabaseError::*;
+        use DatabaseError::*;
         match self {
             PasswordIncorrect => String::from("The given password is invalid."),
+            ContentTooShort => String::from("Content too short!"),
+            ContentTooLong => String::from("Content too long!"),
             AlreadyExists => String::from("A post with this slug already exists."),
-            ValueError => String::from("One of the field values given is invalid."),
-            NotFound => String::from("No post with this slug has been found."),
+            NotAllowed => String::from("You are not allowed to do this!"),
+            ValueError => String::from("One of the field values given is invalid!"),
+            NotFound => {
+                String::from("Nothing with this path exists or you do not have access to it!")
+            }
+            Banned => String::from("You're banned for suspected systems abuse or violating TOS."),
             _ => String::from("An unspecified error has occured"),
         }
     }

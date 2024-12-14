@@ -1,5 +1,5 @@
 use axum::routing::get_service;
-use axum::{routing::get, Router};
+use axum::Router;
 
 use databeam::config::Config as DataConf;
 use rainbeam_shared::fs;
@@ -29,15 +29,38 @@ async fn main() {
         .init();
 
     // init database
-    let database = database::Database::new(DataConf::get_config().connection, config.clone()).await;
+    let auth_database = beambin_core::AuthDatabase::new(
+        DataConf::get_config().connection, // pull connection config from config file
+        beambin_core::AuthServerOptions {
+            captcha: config.captcha.clone(),
+            // registration_enabled: config.registration_enabled,
+            registration_enabled: false,
+            real_ip_header: config.real_ip_header.clone(),
+            static_dir: config.static_dir.clone(),
+            host: config.host.clone(),
+            citrus_id: String::new(),
+            blocked_hosts: config.blocked_hosts.clone(),
+            // secure: config.secure.clone(),
+            secure: true,
+        },
+    )
+    .await;
+    auth_database.init().await;
+
+    let database = database::Database::new(
+        DataConf::get_config().connection,
+        auth_database.clone(),
+        config.clone(),
+    )
+    .await;
     database.init().await;
 
     // ...
     let app = Router::new()
-        .route("/", get(pages::homepage))
-        .merge(pages::routes(database.clone()))
+        .nest("/", pages::routes(database.clone()))
         .nest("/api/v1/posts", api::posts::routes(database.clone()))
         .nest("/api/v0/util", api::util::routes(database.clone()))
+        .nest("/api/v0/auth", beambin_core::authapi::routes(auth_database))
         .nest_service(
             "/static",
             get_service(tower_http::services::ServeDir::new(&static_dir)),

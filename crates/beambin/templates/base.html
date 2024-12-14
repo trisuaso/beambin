@@ -1,7 +1,6 @@
 <!-- 🐝 BEAMBIN <https://github.com/trisuaso/beambin> -->
 <!doctype html>
 <html lang="en">
-    {% let base = crate::config::Config::get_config() %}
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -15,7 +14,7 @@
 
         <meta name="theme-color" content="#febb00" />
         <meta property="og:type" content="website" />
-        <meta property="og:site_name" content="{{ base.name }}" />
+        <meta property="og:site_name" content="{{ config.name }}" />
 
         <link rel="icon" href="/static/favicon.svg" />
 
@@ -62,6 +61,9 @@
             };
         </script>
 
+        <!-- hcaptcha -->
+        <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+
         <!-- turbo -->
         <script
             src="https://unpkg.com/@hotwired/turbo@8.0.5/dist/turbo.es2017-esm.js"
@@ -107,9 +109,9 @@
                             <a href="/">new</a>
                         </span>
 
-                        {% if !base.info_post_slug.is_empty() %}
+                        {% if !config.info_post_slug.is_empty() %}
                         <span class="item">
-                            <a href="/{{ base.info_post_slug }}">info</a>
+                            <a href="/{{ config.info_post_slug }}">info</a>
                         </span>
                         {% endif %}
 
@@ -118,7 +120,7 @@
                                 href="https://github.com/trisuaso/beambin"
                                 title="Beambin"
                             >
-                                {{ base.name }}
+                                {{ config.name }}
                             </a>
                         </span>
                     </div>

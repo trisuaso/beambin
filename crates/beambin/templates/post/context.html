@@ -1,14 +1,10 @@
 {% extends "./base.html" %} {% block title %}Editing "{{ post.slug }}" – {{
-base.name }}{% endblock %} {% block mainstuff %}style="height: 100%; display:
+config.name }}{% endblock %} {% block mainstuff %}style="height: 100%; display:
 flex; flex-direction: column;"{% endblock %} {% block content %}
-<script>
-    globalThis._app_base.auth_token = "{{ auth_token }}";
-</script>
-
 <div class="flex flex-col w-full h-full">
-    {% if is_admin %}
+    {% if is_powerful %}
     <ul class="green small">
-        <li>Admin enabled</li>
+        <li>Editing as admin</li>
     </ul>
     {% endif %}
 
@@ -21,13 +17,6 @@ flex; flex-direction: column;"{% endblock %} {% block content %}
             <button class="button tab secondary" disabled>Preview</button>
             <button class="button tab">Config</button>
         </div>
-
-        <button
-            class="tab secondary opacity-75"
-            onclick="document.getElementById('token_login').showModal()"
-        >
-            Mode
-        </button>
     </div>
 
     <!-- editor -->
@@ -37,6 +26,33 @@ flex; flex-direction: column;"{% endblock %} {% block content %}
             style="flex: 1 0"
             id="context_editor"
         >
+            <!-- auth status -->
+            {% if let Some(user) = profile %}
+            <div class="card secondary round flex flex-col gap-2">
+                <span>Editing as: <b>{{ user.username }}</b></span>
+                <button
+                    class="red round"
+                    onclick="trigger('app:logout')"
+                    type="button"
+                >
+                    Logout
+                </button>
+            </div>
+            {% else %}
+            <div class="card secondary round flex flex-col gap-2">
+                <span>Editing as: <b>anonymous</b></span>
+                <button
+                    class="theme:primary round"
+                    onclick="document.getElementById('token_login').showModal()"
+                    type="button"
+                >
+                    Login
+                </button>
+            </div>
+            {% endif %}
+
+            <hr />
+
             <!-- edit history -->
             <div class="flex flex-col gap-2">
                 <b>Edit history</b>
@@ -46,7 +62,7 @@ flex; flex-direction: column;"{% endblock %} {% block content %}
                     <div class="flex gap-2">
                         <span class="date">{{ ip.0 }}</span>
 
-                        {% if is_admin %}
+                        {% if is_powerful %}
                         <span class="opacity-75">{{ ip.1 }}</span>
                         {% endif %}
                     </div>
@@ -124,23 +140,40 @@ flex; flex-direction: column;"{% endblock %} {% block content %}
 <!-- dialogs -->
 <dialog id="token_login">
     <div class="inner">
-        <form
-            class="flex gap-2 flex-col"
-            onsubmit="event.preventDefault(); set_token(event)"
-        >
-            <label for="token">Token</label>
-            <input id="token" name="token" />
+        <form class="flex gap-2 flex-col" id="login_form">
+            <div class="row flex flex-col gap-1">
+                <label for="username">Username</label>
+                <input
+                    type="text"
+                    name="username"
+                    id="username"
+                    required
+                    minlength="2"
+                    maxlength="32"
+                />
+            </div>
+
+            <div class="row flex flex-col gap-1">
+                <label for="acc_password">Password</label>
+                <input
+                    type="password"
+                    name="acc_password"
+                    id="acc_password"
+                    required
+                    minlength="6"
+                />
+            </div>
+
+            <div
+                class="h-captcha"
+                data-sitekey="{{ config.captcha.site_key }}"
+            ></div>
 
             <div class="flex justify-between">
                 <div></div>
 
                 <div class="flex gap-2">
-                    <button
-                        class="green"
-                        onclick="document.getElementById('token_login').close()"
-                    >
-                        Okay
-                    </button>
+                    <button class="green">Okay</button>
 
                     <button
                         class="red"
@@ -156,10 +189,31 @@ flex; flex-direction: column;"{% endblock %} {% block content %}
 </dialog>
 
 <script>
-    function set_token(e) {
-        fetch(`/api/v0/util/token?token=${e.target.token.value}`, {
-            method: "POST",
+    const callback = "/api/v0/auth/callback";
+
+    document
+        .getElementById("login_form")
+        .addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const res = await fetch("/api/v0/auth/login", {
+                method: "POST",
+                body: JSON.stringify({
+                    username: e.target.username.value,
+                    password: e.target.acc_password.value,
+                    token: e.target.querySelector(".h-captcha textarea").value,
+                }),
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+
+            const json = await res.json();
+
+            if (json.success === false) {
+                alert(json.message);
+            } else {
+                window.location.href = `${callback}?uid=${json.message}`;
+            }
         });
-    }
 </script>
 {% call super() %} {% endblock %}

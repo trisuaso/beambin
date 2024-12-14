@@ -1,4 +1,4 @@
-{% extends "./base.html" %} {% block title %}Error! – {{ base.name }}{% endblock
-%} {% block content %}
+{% extends "./base.html" %} {% block title %}Error! – {{ config.name }}{%
+endblock %} {% block content %}
 <div class="card round">{{ error }}</div>
 {% call super() %} {% endblock %}

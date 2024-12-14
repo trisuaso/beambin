@@ -5,6 +5,20 @@
     app.DEBOUNCE = [];
 
     // ...
+    app.define("logout", async function (_) {
+        if (
+            !(await trigger("app:confirm", [
+                "Are you sure you would like to do this?",
+            ]))
+        ) {
+            return;
+        }
+
+        fetch("/api/v0/auth/logout", { method: "POST" }).then(() => {
+            window.location.reload();
+        });
+    });
+
     app.define("try_use", function (_, ns_name, callback) {
         // attempt to get existing namespace
         if (globalThis._app_base.ns_store[`$${ns_name}`]) {
