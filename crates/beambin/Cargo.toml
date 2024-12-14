@@ -1,0 +1,30 @@
+[package]
+name = "beambin"
+authors = ["hkau"]
+license = "MIT"
+
+version = "1.0.0"
+edition = "2021"
+
+[features]
+postgres = ["beambin-core/postgres"]
+mysql = ["beambin-core/mysql"]
+sqlite = ["beambin-core/sqlite"]
+default = ["beambin-core/sqlite"]
+
+[dependencies]
+axum = "0.7.5"
+axum-macros = "0.4.1"
+serde = { version = "1.0.203", features = ["derive"] }
+serde_json = "1.0.117"
+tokio = { version = "1.38.0", features = ["macros", "rt-multi-thread"] }
+tower-http = { version = "0.5.2", features = ["fs", "trace"] }
+askama = { version = "0.12.1", features = ["with-axum"] }
+askama_axum = "0.4.0"
+beambin-core = { path = "../beambin-core", default-features = false }
+axum-extra = { version = "0.9.3", features = ["cookie"] }
+regex = "1.10.5"
+rainbeam-shared = "0.1.2"
+databeam = { version = "0.1.1", default-features = false }
+tracing = "0.1.40"
+tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }

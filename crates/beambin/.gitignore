@@ -1,0 +1,6 @@
+/target
+*.db
+static/style.css
+static/favicon.svg
+.env
+static/pongo

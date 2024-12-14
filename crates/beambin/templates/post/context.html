@@ -1,0 +1,79 @@
+{% extends "./base.html" %} {% block title %}Editing "{{ post.slug }}" – {{
+base.name }}{% endblock %} {% block mainstuff %}style="height: 100%; display:
+flex; flex-direction: column;"{% endblock %} {% block content %}
+<script>
+    globalThis._app_base.auth_user = "{{ auth_user }}";
+</script>
+
+<div class="flex flex-col w-full h-full">
+    <!-- toolbar -->
+    <div class="flex">
+        <a class="button tab secondary" href="/{{ post.slug }}/edit">Text</a>
+        <button class="button tab secondary" disabled>Preview</button>
+        <button class="button tab">Config</button>
+    </div>
+
+    <!-- editor -->
+    <form class="flex flex-col w-full" id="submit_form" style="flex: 1 0">
+        <div
+            class="card flex flex-col gap-2 animate-fade-in"
+            style="flex: 1 0"
+            id="context_editor"
+        >
+            <div
+                class="flex flex-col gap-2"
+                style="flex: 1 0"
+                id="context_editor_source"
+            ></div>
+        </div>
+
+        <!-- actions -->
+        <fieldset class="w-full my-2">
+            <!-- inputs -->
+            <div class="gap-2 flex items-center float-right mb-2">
+                <!-- prettier-ignore -->
+                <input
+                    name="password"
+                    id="password"
+                    {% if passwordless %}
+                    placeholder="Not needed, you're the owner!"
+                    {% else %}
+                    placeholder="Password"
+                    {% endif %}
+                    required
+                    class="small"
+                    {% if passwordless %}
+                    disabled
+                    {% endif %}
+                />
+            </div>
+
+            <!-- submit -->
+            <button class="round mb-2 !text-emerald-800 dark:!text-emerald-300">
+                Save
+            </button>
+        </fieldset>
+    </form>
+</div>
+
+<!-- init editor -->
+<!-- prettier-ignore -->
+<script type="application/json" id="context">{{ post_context|safe }}</script>
+
+<script>
+    globalThis._app_base.secret = {
+        type: "note-info",
+        title: "Notice",
+    };
+
+    use("context", (context) => {
+        context.context_editor(
+            document.getElementById("context_editor_source"),
+            "{{ post.slug }}",
+            JSON.parse(document.getElementById("context").innerHTML),
+        );
+
+        context.submit_hook("{{ post.slug }}");
+    });
+</script>
+{% call super() %} {% endblock %}

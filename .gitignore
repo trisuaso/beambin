@@ -1,0 +1,16 @@
+target/
+node_modules/
+package-lock.json
+bun.lockb
+
+# prod
+crates/beambin/static/fonts/
+crates/beambin/static/manifest.json
+crates/beambin/static/images/logo/
+crates/beambin/static/images/ui/logo.*
+crates/beambin/static/favicon.svg
+crates/beambin/static/css/style.css
+crates/beambin/templates_build/
+*.db
+.config/config.toml
+.config/databeam/config.toml
