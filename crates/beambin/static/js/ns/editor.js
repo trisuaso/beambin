@@ -103,7 +103,7 @@
 
             stored_timeout = setTimeout(async () => {
                 // fetch url
-                const exists = await (await fetch(`/api/v1/${value}`)).ok;
+                const exists = await (await fetch(`/api/v1/posts/${value}`)).ok;
 
                 if (!exists) {
                     // paste does not exist

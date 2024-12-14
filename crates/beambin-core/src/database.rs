@@ -1,6 +1,8 @@
 use crate::model::{CreatePost, DatabaseError, Post, PostContext, ClonePost, ViewMode};
 use crate::config::Config;
 
+use reqwest::Client as HttpClient;
+
 use databeam::utility;
 use databeam::query as sqlquery;
 
@@ -11,6 +13,7 @@ pub type Result<T> = std::result::Result<T, DatabaseError>;
 pub struct Database {
     pub base: databeam::StarterDatabase,
     pub config: Config,
+    pub http: HttpClient,
 }
 
 impl Database {
@@ -19,6 +22,7 @@ impl Database {
         Self {
             base: databeam::StarterDatabase::new(database_options).await,
             config,
+            http: HttpClient::new(),
         }
     }
 

@@ -78,10 +78,18 @@ pub struct Config {
     pub static_dir: String,
     /// The name of the header used for reading user IP address
     pub real_ip_header: Option<String>,
+    /// The origin of the public server
+    ///
+    /// Used in embeds and links.
+    #[serde(default)]
+    pub host: String,
+    /// A list of external hosts that are blocked
+    #[serde(default)]
+    pub blocked_hosts: Vec<String>,
+    // ...
     /// The slug of the server's information post
     #[serde(default)]
     pub info_post_slug: String,
-    // ...
     /// If posts can require a password to be viewed
     #[serde(default)]
     pub view_password: bool,
@@ -109,6 +117,8 @@ impl Config {
             name: "Beambin".to_string(),
             description: String::new(),
             static_dir: "./.config".to_string(),
+            host: String::new(),
+            blocked_hosts: Vec::new(),
             real_ip_header: None,
             info_post_slug: String::new(),
             view_password: true,
@@ -127,6 +137,8 @@ impl Default for Config {
             name: "Beambin".to_string(),
             description: String::new(),
             static_dir: "./.config".to_string(),
+            host: String::new(),
+            blocked_hosts: Vec::new(),
             real_ip_header: None,
             info_post_slug: String::new(),
             view_password: false,

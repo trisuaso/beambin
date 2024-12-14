@@ -1,9 +1,9 @@
 [package]
 name = "beambin"
-authors = ["hkau"]
+authors = ["trisuaso"]
 license = "MIT"
 
-version = "1.0.0"
+version = "1.0.1"
 edition = "2021"
 
 [features]

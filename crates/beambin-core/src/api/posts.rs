@@ -16,7 +16,7 @@ use axum::{
 
 pub fn routes(database: Database) -> Router {
     Router::new()
-        .route("/new", post(create_request))
+        .route("/", post(create_request))
         .route("/clone", post(clone_request))
         // posts
         .route("/:slug", get(get_request))
@@ -27,7 +27,7 @@ pub fn routes(database: Database) -> Router {
         .with_state(database)
 }
 
-/// Create a new post (`/api/v1/new`)
+/// Create a new post (`/api/v1/posts`)
 async fn create_request(
     headers: HeaderMap,
     State(database): State<Database>,
@@ -58,7 +58,7 @@ async fn create_request(
     }
 }
 
-/// Clone an existing post (`/api/v1/clone`)
+/// Clone an existing post (`/api/v1/posts/clone`)
 async fn clone_request(
     headers: HeaderMap,
 
@@ -90,7 +90,7 @@ async fn clone_request(
     }
 }
 
-/// Delete an existing post (`/api/v1/:slug/delete`)
+/// Delete an existing post (`/api/v1/posts/:slug/delete`)
 async fn delete_request(
     State(database): State<Database>,
     Path(slug): Path<String>,
@@ -106,7 +106,7 @@ async fn delete_request(
     }
 }
 
-/// Edit an existing post (`/api/v1/:slug/edit`)
+/// Edit an existing post (`/api/v1/posts/:slug/edit`)
 async fn edit_request(
     headers: HeaderMap,
     State(database): State<Database>,
@@ -146,7 +146,7 @@ async fn edit_request(
     }
 }
 
-/// Edit an existing post's context (`/api/v1/:slug/context`)
+/// Edit an existing post's context (`/api/v1/posts/:slug/context`)
 async fn edit_post_context(
     State(database): State<Database>,
     Path(slug): Path<String>,
@@ -165,7 +165,7 @@ async fn edit_post_context(
     }
 }
 
-/// Get an existing post by slug (`/api/v1/:slug`)
+/// Get an existing post by slug (`/api/v1/posts/:slug`)
 pub async fn get_request(
     State(database): State<Database>,
     Path(slug): Path<String>,

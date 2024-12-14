@@ -29,24 +29,20 @@ async fn main() {
         .init();
 
     // init database
-    let database = database::Database::new(
-        DataConf::get_config().connection,
-        config::Config::get_config(),
-    )
-    .await;
-
+    let database = database::Database::new(DataConf::get_config().connection, config.clone()).await;
     database.init().await;
 
     // ...
     let app = Router::new()
         .route("/", get(pages::homepage))
         .merge(pages::routes(database.clone()))
-        .nest("/api/v1", api::routes(database.clone()))
+        .nest("/api/v1/posts", api::posts::routes(database.clone()))
+        .nest("/api/v0/util", api::util::routes(database.clone()))
         .nest_service(
             "/static",
             get_service(tower_http::services::ServeDir::new(&static_dir)),
         )
-        .fallback(api::not_found)
+        .fallback(api::posts::not_found)
         .layer(
             TraceLayer::new_for_http()
                 .make_span_with(trace::DefaultMakeSpan::new().level(Level::INFO))

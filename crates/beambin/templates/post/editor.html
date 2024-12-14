@@ -80,7 +80,7 @@ flex; flex-direction: column;"{% endblock %}{% block content %}
                 <button
                     class="round mb-2 !text-red-800 dark:!text-red-300"
                     id="delete_post"
-                    data-endpoint="/api/v1/{{ post.slug }}/delete"
+                    data-endpoint="/api/v1/posts/{{ post.slug }}/delete"
                     type="button"
                 >
                     Delete
@@ -97,7 +97,7 @@ flex; flex-direction: column;"{% endblock %}{% block content %}
             e.preventDefault();
 
             const res = await (
-                await fetch("/api/v1/{{ post.slug }}/edit", {
+                await fetch("/api/v1/posts/{{ post.slug }}/edit", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -113,13 +113,13 @@ flex; flex-direction: column;"{% endblock %}{% block content %}
             ).json();
 
             if (res.success === false) {
-                window.location.href = `?SECRET=${res.message}&SECRET_TYPE=note-error&SECRET_TITLE=Error`;
+                window.location.href = `?ANNC=${res.message}&ANNC_TYPE=error`;
             } else {
                 let url =
                     (e.target.new_slug || { value: "" }).value ||
                     "{{ post.slug }}";
 
-                window.location.href = `/${url}?SECRET=${res.message}&SECRET_TYPE=note-info&SECRET_TITLE=Notice`;
+                window.location.href = `/${url}?ANNC=${res.message}&ANNC_TYPE=info`;
             }
         });
 
@@ -127,21 +127,23 @@ flex; flex-direction: column;"{% endblock %}{% block content %}
         .getElementById("delete_post")
         .addEventListener("click", async () => {
             if (
-                !confirm(
+                !(await trigger("app:confirm", [
                     "Are you sure you would like to do this? It cannot be undone.",
-                )
+                ]))
             ) {
                 return;
             }
 
-            const password = prompt("Enter this post's edit password:");
+            const password = await trigger("app:prompt", [
+                "Enter this post's edit password:",
+            ]);
 
             if (!password) {
                 return;
             }
 
             const res = await (
-                await fetch("/api/v1/{{ post.slug }}/delete", {
+                await fetch("/api/v1/posts/{{ post.slug }}/delete", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -153,10 +155,9 @@ flex; flex-direction: column;"{% endblock %}{% block content %}
             ).json();
 
             if (res.success === false) {
-                window.location.href = `?SECRET=${res.message}&SECRET_TYPE=note-error&SECRET_TITLE=Error`;
+                window.location.href = `?ANNC=${res.message}&ANNC_TYPE=error`;
             } else {
-                window.location.href =
-                    "/?SECRET=Post%20deleted.&SECRET_TYPE=note-info&SECRET_TITLE=Notice";
+                window.location.href = `/?ANNC=${res.message}&ANNC_TYPE=info`;
             }
         });
 </script>

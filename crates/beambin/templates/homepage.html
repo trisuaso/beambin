@@ -51,7 +51,7 @@ endblock %}{% block content %}
             e.preventDefault();
 
             const res = await (
-                await fetch("/api/v1/new", {
+                await fetch("/api/v1/posts", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -65,9 +65,9 @@ endblock %}{% block content %}
             ).json();
 
             if (res.success === false) {
-                trigger("app:gen_secret", ["note-error", "Error", res.message]);
+                trigger("app:shout", ["error", res.message]);
             } else {
-                window.location.href = `/${res.payload[1].slug}?SECRET=${res.payload[0]}`;
+                window.location.href = `/${res.payload[1].slug}?ANNC=${res.payload[0]}`;
             }
         });
 </script>

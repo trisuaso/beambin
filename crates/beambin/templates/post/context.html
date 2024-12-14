@@ -20,11 +20,32 @@ flex; flex-direction: column;"{% endblock %} {% block content %}
             style="flex: 1 0"
             id="context_editor"
         >
-            <div
-                class="flex flex-col gap-2"
-                style="flex: 1 0"
-                id="context_editor_source"
-            ></div>
+            <!-- edit history -->
+            <div class="flex flex-col gap-2">
+                <b>Edit history</b>
+
+                {% for (i, ip) in post.ips.iter().enumerate() %}
+                <div class="card secondary round flex justify-between gap-2">
+                    <span class="date">{{ ip.0 }}</span>
+
+                    {% if i == post.ips.len() - 1 %}
+                    <span class="opacity-75">Latest</span>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <hr />
+
+            <!-- context -->
+            <div class="flex flex-col gap-2" style="flex: 1 0">
+                <b>Config</b>
+
+                <div
+                    class="flex flex-col gap-2"
+                    id="context_editor_source"
+                ></div>
+            </div>
         </div>
 
         <!-- actions -->
@@ -61,8 +82,8 @@ flex; flex-direction: column;"{% endblock %} {% block content %}
 <script type="application/json" id="context">{{ post_context|safe }}</script>
 
 <script>
-    globalThis._app_base.secret = {
-        type: "note-info",
+    globalThis._app_base.annc = {
+        type: "info",
         title: "Notice",
     };
 

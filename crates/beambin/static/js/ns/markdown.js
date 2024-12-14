@@ -85,7 +85,7 @@
                 e.preventDefault();
 
                 const res = await (
-                    await fetch("/api/v1/clone", {
+                    await fetch("/api/v1/posts/clone", {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
@@ -99,15 +99,11 @@
                 ).json();
 
                 if (res.success === false) {
-                    trigger("app:gen_secret", [
-                        "note-error",
-                        "Error",
-                        res.message,
-                    ]);
+                    trigger("app:shout", ["error", res.message]);
 
                     $.dialog.close();
                 } else {
-                    window.location.href = `/${res.payload[1].slug}?SECRET=${res.payload[0]}`;
+                    window.location.href = `/${res.payload[1].slug}?ANNC=${res.payload[0]}`;
                 }
             });
     });

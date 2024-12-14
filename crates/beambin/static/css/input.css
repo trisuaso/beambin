@@ -22,6 +22,18 @@ hr {
     @apply border-neutral-400/50 dark:border-neutral-700/50;
 }
 
+align {
+    @apply block w-full;
+}
+
+align.center {
+    @apply text-center;
+}
+
+align.right {
+    @apply text-right;
+}
+
 /* card */
 .card {
     @apply bg-neutral-200 dark:bg-neutral-800;
@@ -171,7 +183,7 @@ ol > li {
     margin-top: 0.25rem;
 }
 
-p:not(.mdnote p):not(.builder\:text),
+p:not(.markdown-alert p):not(.builder\:text),
 pre,
 table,
 ul,
@@ -330,39 +342,39 @@ code:not(pre code),
     padding: 0 !important;
 }
 
-.mdnote {
+.markdown-alert {
     @apply p-4 w-full mb-4 rounded-sm;
 }
 
-.mdnote.note-warn {
+.markdown-alert.warn {
     @apply bg-yellow-300/25 dark:bg-yellow-300/15;
 }
 
-.mdnote.note-warn .mdnote-title {
+.markdown-alert.warn .markdown-alert-title {
     @apply text-yellow-900 dark:text-yellow-200/75;
 }
 
-.mdnote.note-info {
+.markdown-alert.info {
     @apply bg-sky-400/25 dark:bg-sky-400/15;
 }
 
-.mdnote.note-info .mdnote-title {
+.markdown-alert.info .markdown-alert-title {
     @apply text-sky-900 dark:text-sky-300/75;
 }
 
-.mdnote.note-note {
+.markdown-alert.note {
     @apply bg-green-400/25 dark:bg-green-400/15;
 }
 
-.mdnote.note-note .mdnote-title {
+.markdown-alert.note .markdown-alert-title {
     @apply text-green-900 dark:text-green-300/75;
 }
 
-.mdnote.note-error {
+.markdown-alert.error {
     @apply bg-red-400/25 dark:bg-red-400/15;
 }
 
-.mdnote.note-error .mdnote-title {
+.markdown-alert.error .markdown-alert-title {
     @apply text-red-900 dark:text-red-200/75;
 }
 
@@ -465,6 +477,12 @@ dialog {
     @apply backdrop-blur-lg bg-neutral-200/75 dark:bg-neutral-800/75;
     @apply m-auto fixed border-none text-current shadow-md;
     display: none;
+}
+
+dialog .inner {
+    padding: 1rem;
+    width: 25rem;
+    max-width: 100%;
 }
 
 dialog[open] {

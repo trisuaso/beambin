@@ -71,6 +71,10 @@
                     continue;
                 }
 
+                if (field[0] === "owner") {
+                    continue;
+                }
+
                 bind_to.innerHTML += `<div class="card secondary round flex justify-between items-center gap-2" style="flex-wrap: wrap;" id="field:${field[0]}">
                     <label for="field_input:${field[0]}">${field[0]}</label>
                     <input
@@ -93,7 +97,7 @@
                 e.preventDefault();
 
                 const res = await (
-                    await fetch(`/api/v1/${slug}/context`, {
+                    await fetch(`/api/v1/posts/${slug}/context`, {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
@@ -106,9 +110,9 @@
                 ).json();
 
                 if (res.success === false) {
-                    window.location.href = `?SECRET=${res.message}&SECRET_TYPE=note-error&SECRET_TITLE=Error`;
+                    window.location.href = `?ANNC=${res.message}&ANNC_TYPE=error`;
                 } else {
-                    window.location.href = `?SECRET=${res.message}`;
+                    window.location.href = `?ANNC=${res.message}`;
                 }
             });
     });

@@ -24,16 +24,12 @@
         <div class="flex flex-col items-end g-1 opacity-75">
             <span>
                 Pub:
-                <span class="date-time-to-localize">
-                    {{ post.date_published }}
-                </span>
+                <span class="date"> {{ post.date_published }} </span>
             </span>
 
             <span>
                 Edit:
-                <span class="date-time-to-localize">
-                    {{ post.date_edited }}
-                </span>
+                <span class="date"> {{ post.date_edited }} </span>
             </span>
 
             <span>Views: {{ views }}</span>
@@ -55,8 +51,8 @@
         });
     });
 
-    globalThis._app_base.secret = {
-        type: "note-info",
+    globalThis._app_base.annc = {
+        type: "info",
         title: "Edit Code",
     };
 </script>

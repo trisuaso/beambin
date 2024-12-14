@@ -1,5 +1,6 @@
 port = 8080
-blocked_hosted = ["https://example.com", "https://example2.com"]
+host = "https://example1.com"
+blocked_hosts = ["https://example.com", "https://example2.com"]
 
 name = "Beambin"
 description = "My Beambin instance"
