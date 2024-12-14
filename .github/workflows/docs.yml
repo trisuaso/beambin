@@ -31,7 +31,7 @@ jobs:
             - name: Build documentation
               run: cargo doc --no-deps --document-private-items  --workspace --exclude neospring-desktop
             - name: Create index.html
-              run: echo '<meta http-equiv="refresh" content="0;url=beambin-core/index.html">' > target/doc/index.html
+              run: echo '<meta http-equiv="refresh" content="0;url=beambin_core/index.html">' > target/doc/index.html
             - name: Artifact
               uses: actions/upload-pages-artifact@v3
               with:
