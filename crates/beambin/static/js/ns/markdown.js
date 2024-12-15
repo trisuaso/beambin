@@ -34,31 +34,18 @@
             }
 
             // handle modification blocks
-            for (const script of Array.from(
-                document.querySelectorAll(`#${root_id} script[type="env/mod"]`),
-            )) {
-                try {
-                    const mods = JSON.parse(script.innerHTML);
-                    let element = script.previousSibling;
-
-                    // find something that isn't useless
-                    // (anything but #text)
-                    while (element.nodeName === "#text") {
-                        element = element.previousSibling;
-                    }
-
-                    // update attributes
-                    for (const entry of Object.entries(mods)) {
-                        element.setAttribute(entry[0], entry[1]);
-                    }
-
-                    element.setAttribute("data-env-modified", "true");
-                    script.remove();
-                } catch (err) {
-                    console.error("MOD:", err);
-                    continue;
+            function mod_attr(css_property) {
+                for (const element of Array.from(
+                    document.querySelectorAll(`[data-${css_property}]`),
+                )) {
+                    element.style.setProperty(
+                        css_property,
+                        element.getAttribute(`data-${css_property}`),
+                    );
                 }
             }
+
+            mod_attr("color");
 
             // escape all code blocks
             for (const block of Array.from(

@@ -2164,9 +2164,9 @@ dependencies = [
 
 [[package]]
 name = "rainbeam-shared"
-version = "0.1.2"
+version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "94bcf4e5d9fc198347bf8c6d2e34d2667dd5d7b890d9e0fb7a6f31dda87acc49"
+checksum = "6a51fba7dad11e0eb56b7532ed74771df3d2a2e5e53f0c6cc8aece3da16b2894"
 dependencies = [
  "ammonia",
  "comrak",
