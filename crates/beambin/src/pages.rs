@@ -50,6 +50,7 @@ pub async fn homepage(State(database): State<Database>) -> impl IntoResponse {
 struct PostViewTemplate {
     config: Config,
     post: Post,
+    owner: Option<Box<Profile>>,
     rendered: String,
     title: String,
     views: i32,
@@ -134,6 +135,17 @@ pub async fn view_post_request(
                 PostViewTemplate {
                     config: database.config.clone(),
                     post: p.clone(),
+                    owner: if !p.context.owner.is_empty() {
+                        if let Ok(profile) =
+                            database.auth.get_profile(p.context.owner.clone()).await
+                        {
+                            Some(profile)
+                        } else {
+                            None
+                        }
+                    } else {
+                        None
+                    },
                     rendered,
                     title: match p.context.title.is_empty() {
                         true => p.slug.clone(),
@@ -259,8 +271,13 @@ pub async fn editor_request(
             Html(
                 EditorTemplate {
                     config: database.config,
+                    passwordless: is_powerful
+                        | if let Some(ref profile) = auth_user {
+                            profile.id == p.context.owner
+                        } else {
+                            false
+                        },
                     post: p,
-                    passwordless: false,
                     is_powerful,
                 }
                 .render()
@@ -358,7 +375,6 @@ pub async fn config_editor_request(
             Html(
                 ConfigEditorTemplate {
                     config: database.config.clone(),
-                    profile: auth_user,
                     post: p.clone(),
                     post_context: match serde_json::to_string(&p.context) {
                         Ok(m) => m,
@@ -373,7 +389,13 @@ pub async fn config_editor_request(
                             )
                         }
                     },
-                    passwordless: false,
+                    passwordless: is_powerful
+                        | if let Some(ref profile) = auth_user {
+                            profile.id == p.context.owner
+                        } else {
+                            false
+                        },
+                    profile: auth_user,
                     is_powerful,
                 }
                 .render()

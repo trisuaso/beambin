@@ -3,6 +3,28 @@
 
 {{ head_stuff|safe }} {% endblock %}{% block content %}
 <div class="flex flex-col w-full h-full gap-2">
+    <!-- prettier-ignore -->
+    {% if !post.context.next.is_empty() | !post.context.previous.is_empty() %}
+    <div class="card round flex items-center justify-between gap-2">
+        <!-- prettier-ignore -->
+        {% if !post.context.previous.is_empty() %}
+        <a class="button round blue" href="/{{ post.context.previous }}"
+            >Previous</a
+        >
+        {% endif %}
+
+        <!-- prettier-ignore -->
+        {% if !post.context.title.is_empty() %}
+        <b>{{ post.context.title }}</b>
+        {% endif %}
+
+        <!-- prettier-ignore -->
+        {% if !post.context.next.is_empty() %}
+        <a class="button round blue" href="/{{ post.context.next }}">Next</a>
+        {% endif %}
+    </div>
+    {% endif %}
+
     <div class="card more_padding round min-h-[15rem]" id="tab_container">
         {{ rendered|safe }}
     </div>
@@ -33,6 +55,24 @@
             </span>
 
             <span>Views: {{ views }}</span>
+
+            {% if let Some(user) = owner %}
+            <a
+                class="flex items-center gap-2"
+                href="{{ config.rainbeam_host }}/@{{ user.username }}"
+            >
+                <img
+                    title="{{ user.username }}'s avatar"
+                    src="/api/v0/auth/profile/{{ user.id }}/avatar"
+                    alt=""
+                    class="avatar"
+                    loading="lazy"
+                    style="--size: 20px"
+                />
+
+                {{ user.username }}
+            </a>
+            {% endif %}
         </div>
     </div>
 </div>

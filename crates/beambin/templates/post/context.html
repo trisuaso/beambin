@@ -1,7 +1,13 @@
 {% extends "./base.html" %} {% block title %}Editing "{{ post.slug }}" – {{
 config.name }}{% endblock %} {% block mainstuff %}style="height: 100%; display:
 flex; flex-direction: column;"{% endblock %} {% block content %}
-<div class="flex flex-col w-full h-full">
+<style>
+    #page {
+        height: max-content !important;
+    }
+</style>
+
+<div class="flex flex-col w-full">
     {% if is_powerful %}
     <ul class="green small">
         <li>Editing as admin</li>
@@ -141,6 +147,13 @@ flex; flex-direction: column;"{% endblock %} {% block content %}
 <dialog id="token_login">
     <div class="inner">
         <form class="flex gap-2 flex-col" id="login_form">
+            <div class="card round secondary">
+                Hosted by
+                <a href="{{ config.rainbeam_host }}"
+                    >{{ config.rainbeam_host }}</a
+                >
+            </div>
+
             <div class="row flex flex-col gap-1">
                 <label for="username">Username</label>
                 <input

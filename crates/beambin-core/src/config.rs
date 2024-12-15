@@ -84,6 +84,9 @@ pub struct Config {
     /// Used in embeds and links.
     #[serde(default)]
     pub host: String,
+    /// The host of the Rainbeam server to show authentication profiles
+    #[serde(default)]
+    pub rainbeam_host: String,
     /// A list of external hosts that are blocked
     #[serde(default)]
     pub blocked_hosts: Vec<String>,
@@ -121,6 +124,7 @@ impl Config {
             description: String::new(),
             static_dir: "./.config".to_string(),
             host: String::new(),
+            rainbeam_host: String::new(),
             blocked_hosts: Vec::new(),
             real_ip_header: None,
             info_post_slug: String::new(),
@@ -142,6 +146,7 @@ impl Default for Config {
             description: String::new(),
             static_dir: "./.config".to_string(),
             host: String::new(),
+            rainbeam_host: String::new(),
             blocked_hosts: Vec::new(),
             real_ip_header: None,
             info_post_slug: String::new(),

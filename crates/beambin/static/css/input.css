@@ -38,6 +38,18 @@ align.right {
     @apply grid place-items-center;
 }
 
+.avatar {
+    --size: 20px;
+    @apply rounded;
+    width: var(--size);
+    min-width: var(--size);
+    max-width: var(--size);
+    height: var(--size);
+    min-height: var(--size);
+    max-height: var(--size);
+    object-fit: cover;
+}
+
 /* card */
 .card {
     @apply bg-neutral-200 dark:bg-neutral-800;
@@ -97,12 +109,16 @@ a.button[disabled] {
     @apply opacity-50 cursor-not-allowed;
 }
 
+.red {
+    @apply !text-red-800 dark:!text-red-300 !important;
+}
+
 .green {
     @apply !text-emerald-800 dark:!text-emerald-300 !important;
 }
 
-.red {
-    @apply !text-red-800 dark:!text-red-300 !important;
+.blue {
+    @apply !text-blue-800 dark:!text-blue-300 !important;
 }
 
 /* typography */
@@ -407,14 +423,6 @@ code:not(pre code),
 
 .footernav .item:first-child:before {
     display: none;
-}
-
-/* avatar */
-.avatar {
-    --size: 50px;
-    border-radius: var(--roundness);
-    width: var(--size);
-    height: var(--size);
 }
 
 /* nav */

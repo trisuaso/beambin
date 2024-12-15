@@ -33,6 +33,16 @@
                 bundled.remove();
             }
 
+            // get css
+            const css = document.querySelector("code.language-css");
+
+            if (css !== null) {
+                const stylesheet = document.createElement("style");
+                stylesheet.id = "custom-styles";
+                stylesheet.innerHTML = css.innerText;
+                document.body.appendChild(stylesheet);
+            }
+
             // handle modification blocks
             function mod_attr(css_property) {
                 for (const element of Array.from(

@@ -67,6 +67,12 @@ pub struct PostContext {
     /// * anything else = the slug of the template post this post is derived from
     #[serde(default)]
     pub template: String,
+    /// The slug of the next post in this collection
+    #[serde(default)]
+    pub next: String,
+    /// The slug of the previous post in this collection
+    #[serde(default)]
+    pub previous: String,
 }
 
 impl Default for PostContext {
@@ -79,6 +85,8 @@ impl Default for PostContext {
             view_password: String::new(),
             owner: String::new(),
             template: String::new(),
+            next: String::new(),
+            previous: String::new(),
         }
     }
 }

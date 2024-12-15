@@ -390,8 +390,6 @@ impl Database {
         };
 
         // check password
-        let mut skip_password_check = false;
-
         if let Some(ref ua) = user {
             // check permission
             let group = match self.auth.get_group_by_id(ua.group).await {
@@ -399,28 +397,30 @@ impl Database {
                 Err(_) => return Err(DatabaseError::Other),
             };
 
-            if !group
-                .permissions
-                .contains(&authbeam::model::Permission::Manager)
-            {
-                return Err(DatabaseError::NotAllowed);
-            } else {
-                if let Err(_) = self
-                    .auth
-                    .audit(
-                        ua.id.to_owned(),
-                        format!("Deleted a post: {}", existing.slug),
-                    )
-                    .await
+            if ua.id != existing.context.owner {
+                if !group
+                    .permissions
+                    .contains(&authbeam::model::Permission::Manager)
                 {
-                    return Err(DatabaseError::Other);
+                    // check password, not paste owner
+                    if utility::hash(password) != existing.password {
+                        return Err(DatabaseError::PasswordIncorrect);
+                    }
+                } else {
+                    if let Err(_) = self
+                        .auth
+                        .audit(
+                            ua.id.to_owned(),
+                            format!("Deleted a post: {}", existing.slug),
+                        )
+                        .await
+                    {
+                        return Err(DatabaseError::Other);
+                    }
                 }
-
-                skip_password_check = true
             }
-        }
-
-        if !skip_password_check {
+        } else {
+            // check password, no account
             if utility::hash(password) != existing.password {
                 return Err(DatabaseError::PasswordIncorrect);
             }
@@ -506,8 +506,6 @@ impl Database {
         };
 
         // check password
-        let mut skip_password_check = false;
-
         if let Some(ref ua) = user {
             // check permission
             let group = match self.auth.get_group_by_id(ua.group).await {
@@ -515,28 +513,30 @@ impl Database {
                 Err(_) => return Err(DatabaseError::Other),
             };
 
-            if !group
-                .permissions
-                .contains(&authbeam::model::Permission::Manager)
-            {
-                return Err(DatabaseError::NotAllowed);
-            } else {
-                if let Err(_) = self
-                    .auth
-                    .audit(
-                        ua.id.to_owned(),
-                        format!("Edited a post: {}", existing.slug),
-                    )
-                    .await
+            if ua.id != existing.context.owner {
+                if !group
+                    .permissions
+                    .contains(&authbeam::model::Permission::Manager)
                 {
-                    return Err(DatabaseError::Other);
+                    // check password, not paste owner
+                    if utility::hash(password) != existing.password {
+                        return Err(DatabaseError::PasswordIncorrect);
+                    }
+                } else {
+                    if let Err(_) = self
+                        .auth
+                        .audit(
+                            ua.id.to_owned(),
+                            format!("Edited a post: {}", existing.slug),
+                        )
+                        .await
+                    {
+                        return Err(DatabaseError::Other);
+                    }
                 }
-
-                skip_password_check = true
             }
-        }
-
-        if !skip_password_check {
+        } else {
+            // check password, no account
             if utility::hash(password) != existing.password {
                 return Err(DatabaseError::PasswordIncorrect);
             }
@@ -620,7 +620,7 @@ impl Database {
         &self,
         mut slug: String,
         password: String,
-        context: PostContext,
+        mut context: PostContext,
         user: Option<Box<Profile>>,
     ) -> Result<()> {
         slug = idna::punycode::encode_str(&slug).unwrap().to_lowercase();
@@ -636,8 +636,6 @@ impl Database {
         };
 
         // check password
-        let mut skip_password_check = false;
-
         if let Some(ref ua) = user {
             // check permission
             let group = match self.auth.get_group_by_id(ua.group).await {
@@ -645,31 +643,39 @@ impl Database {
                 Err(_) => return Err(DatabaseError::Other),
             };
 
-            if !group
-                .permissions
-                .contains(&authbeam::model::Permission::Manager)
-            {
-                return Err(DatabaseError::NotAllowed);
-            } else {
-                if let Err(_) = self
-                    .auth
-                    .audit(
-                        ua.id.to_owned(),
-                        format!("Edited a post's context: {}", existing.slug),
-                    )
-                    .await
+            if ua.id != existing.context.owner {
+                if !group
+                    .permissions
+                    .contains(&authbeam::model::Permission::Manager)
                 {
-                    return Err(DatabaseError::Other);
+                    // check password, not paste owner
+                    if utility::hash(password) != existing.password {
+                        return Err(DatabaseError::PasswordIncorrect);
+                    }
+                } else {
+                    if let Err(_) = self
+                        .auth
+                        .audit(
+                            ua.id.to_owned(),
+                            format!("Edited a post's context: {}", existing.slug),
+                        )
+                        .await
+                    {
+                        return Err(DatabaseError::Other);
+                    }
                 }
-
-                skip_password_check = true
             }
-        }
 
-        if !skip_password_check {
+            // update owner
+            context.owner = ua.id.clone();
+        } else {
+            // check password, no account
             if utility::hash(password) != existing.password {
                 return Err(DatabaseError::PasswordIncorrect);
             }
+
+            // clear owner
+            context.owner = String::new();
         }
 
         // edit post

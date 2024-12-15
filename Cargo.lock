@@ -344,7 +344,7 @@ dependencies = [
 
 [[package]]
 name = "beambin"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "askama",
  "askama_axum",
@@ -365,7 +365,7 @@ dependencies = [
 
 [[package]]
 name = "beambin-core"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "authbeam",
  "axum",

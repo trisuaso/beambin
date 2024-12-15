@@ -4,7 +4,7 @@ description = "Pluggable pastebin backend"
 authors = ["trisuaso"]
 license = "MIT"
 
-version = "1.0.1"
+version = "1.0.2"
 edition = "2021"
 
 documentation = "https://docs.rs/postbeam"

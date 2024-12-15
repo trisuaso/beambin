@@ -71,10 +71,6 @@
                     continue;
                 }
 
-                if (field[0] === "owner") {
-                    continue;
-                }
-
                 bind_to.innerHTML += `<div class="card secondary round flex justify-between items-center gap-2" style="flex-wrap: wrap;" id="field:${field[0]}">
                     <label for="field_input:${field[0]}">${field[0]}</label>
                     <input
