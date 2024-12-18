@@ -69,7 +69,11 @@ flex; flex-direction: column;"{% endblock %} {% block content %}
                         <span class="date">{{ ip.0 }}</span>
 
                         {% if is_powerful %}
-                        <span class="opacity-75">{{ ip.1 }}</span>
+                        <a
+                            class="opacity-75"
+                            href="{{ config.rainbeam_host }}/+i/{{ ip.1 }}"
+                            >{{ ip.1 }}</a
+                        >
                         {% endif %}
                     </div>
 

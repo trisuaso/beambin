@@ -34,12 +34,19 @@
             }
 
             // get css
-            const css = document.querySelector("code.language-css");
+            const css = document.querySelector("code.language-style");
+
+            if (document.getElementById("custom-styles")) {
+                document.getElementById("custom-styles").remove();
+            }
 
             if (css !== null) {
                 const stylesheet = document.createElement("style");
+
                 stylesheet.id = "custom-styles";
                 stylesheet.innerHTML = css.innerText;
+
+                css.remove();
                 document.body.appendChild(stylesheet);
             }
 
@@ -56,6 +63,7 @@
             }
 
             mod_attr("color");
+            mod_attr("font-family");
 
             // escape all code blocks
             for (const block of Array.from(

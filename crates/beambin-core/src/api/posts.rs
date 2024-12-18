@@ -46,6 +46,11 @@ async fn create_request(
         String::new()
     };
 
+    // check ip
+    if database.auth.get_ipban_by_ip(real_ip.clone()).await.is_ok() {
+        return Err(DatabaseError::NotAllowed);
+    }
+
     // ...
     let res = database.create_post(props, real_ip).await;
 
@@ -77,6 +82,11 @@ async fn clone_request(
     } else {
         String::new()
     };
+
+    // check ip
+    if database.auth.get_ipban_by_ip(real_ip.clone()).await.is_ok() {
+        return Err(DatabaseError::NotAllowed);
+    }
 
     // ...
     let res = database.clone_post(props, real_ip).await;
