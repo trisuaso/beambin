@@ -1,4 +1,4 @@
-<!-- 🐝 BEAMBIN <https://github.com/trisuaso/beambin> -->
+<!-- 🐝 BEAMBIN buzz -->
 <!doctype html>
 <html lang="en">
     <head>
@@ -54,7 +54,9 @@
 
             globalThis._app_base = {
                 name: "beambin",
-                config: {},
+                config: {
+                    no_auth: "{{ config.rainbeam_host.is_empty() }}" === "true",
+                },
                 build: {},
                 ns_store: {},
                 classes: {},
@@ -114,15 +116,6 @@
                             <a href="/{{ config.info_post_slug }}">info</a>
                         </span>
                         {% endif %}
-
-                        <span class="item">
-                            <a
-                                href="https://github.com/trisuaso/beambin"
-                                title="Beambin"
-                            >
-                                {{ config.name }}
-                            </a>
-                        </span>
                     </div>
 
                     <!-- theme -->

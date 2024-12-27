@@ -13,7 +13,7 @@
             };
 
             // ...
-            if (Object.entries($.context).length == 0) {
+            if (Object.entries($.context).length === 0) {
                 bind_to.innerHTML = `<div class="card secondary round">
                     <span>No metadata options available.</span>
                 </div>`;
@@ -22,7 +22,7 @@
             // render
             for (const field of Object.entries($.context)) {
                 if (
-                    globalThis._app_base.starstraw === false &&
+                    globalThis._app_base.config.no_auth === true &&
                     field[0] === "owner"
                 ) {
                     continue;
