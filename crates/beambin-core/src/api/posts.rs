@@ -6,7 +6,7 @@ use crate::model::{
 use crate::database::Database;
 use axum::http::{HeaderMap, HeaderValue};
 use axum_extra::extract::CookieJar;
-use databeam::DefaultReturn;
+use databeam::prelude::DefaultReturn;
 
 use axum::response::IntoResponse;
 use axum::{
@@ -20,10 +20,10 @@ pub fn routes(database: Database) -> Router {
         .route("/", post(create_request))
         .route("/clone", post(clone_request))
         // posts
-        .route("/:slug", get(get_request))
-        .route("/:slug/delete", post(delete_request))
-        .route("/:slug/edit", post(edit_request))
-        .route("/:slug/context", post(edit_post_context))
+        .route("/{slug}", get(get_request))
+        .route("/{slug}/delete", post(delete_request))
+        .route("/{slug}/edit", post(edit_request))
+        .route("/{slug}/context", post(edit_post_context))
         // ...
         .with_state(database)
 }
@@ -101,7 +101,7 @@ async fn clone_request(
     }
 }
 
-/// Delete an existing post (`/api/v1/posts/:slug/delete`)
+/// Delete an existing post (`/api/v1/posts/{slug}/delete`)
 async fn delete_request(
     jar: CookieJar,
     State(database): State<Database>,
@@ -131,7 +131,7 @@ async fn delete_request(
     }
 }
 
-/// Edit an existing post (`/api/v1/posts/:slug/edit`)
+/// Edit an existing post (`/api/v1/posts/{slug}/edit`)
 async fn edit_request(
     jar: CookieJar,
     headers: HeaderMap,
@@ -185,7 +185,7 @@ async fn edit_request(
     }
 }
 
-/// Edit an existing post's context (`/api/v1/posts/:slug/context`)
+/// Edit an existing post's context (`/api/v1/posts/{slug}/context`)
 async fn edit_post_context(
     jar: CookieJar,
     State(database): State<Database>,
@@ -218,7 +218,7 @@ async fn edit_post_context(
     }
 }
 
-/// Get an existing post by slug (`/api/v1/posts/:slug`)
+/// Get an existing post by slug (`/api/v1/posts/{slug}`)
 pub async fn get_request(
     State(database): State<Database>,
     Path(slug): Path<String>,

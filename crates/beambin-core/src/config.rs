@@ -5,6 +5,7 @@ use std::io::Result;
 use rainbeam_shared::fs;
 use crate::model::ViewMode;
 use authbeam::database::HCaptchaConfig;
+use pathbufd::PathBufD;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct PostsConfig {
@@ -76,7 +77,7 @@ pub struct Config {
     pub description: String,
     /// The location of the static directory, should not be supplied manually as it will be overwritten with `./.config/static`
     #[serde(default)]
-    pub static_dir: String,
+    pub static_dir: PathBufD,
     /// The name of the header used for reading user IP address
     pub real_ip_header: Option<String>,
     /// The origin of the public server
@@ -113,6 +114,11 @@ pub struct Config {
     /// Views table config
     #[serde(default)]
     pub table_views: ViewsConfig,
+    /// The location of media uploads on the file system
+    #[serde(default)]
+    pub media_dir: PathBufD,
+    /// The server ID for ID generation
+    pub snowflake_server_id: usize,
 }
 
 impl Config {
@@ -122,7 +128,7 @@ impl Config {
             port: 8080,
             name: "Beambin".to_string(),
             description: String::new(),
-            static_dir: "./.config".to_string(),
+            static_dir: PathBufD::new().extend(&[".config", "static"]),
             host: String::new(),
             rainbeam_host: String::new(),
             blocked_hosts: Vec::new(),
@@ -134,6 +140,8 @@ impl Config {
             captcha: HCaptchaConfig::default(),
             table_posts: PostsConfig::default(),
             table_views: ViewsConfig::default(),
+            media_dir: PathBufD::new(),
+            snowflake_server_id: 1234567890,
         }
     }
 }
@@ -144,7 +152,7 @@ impl Default for Config {
             port: 8080,
             name: "Beambin".to_string(),
             description: String::new(),
-            static_dir: "./.config".to_string(),
+            static_dir: PathBufD::new().extend(&[".config", "static"]),
             host: String::new(),
             rainbeam_host: String::new(),
             blocked_hosts: Vec::new(),
@@ -156,6 +164,8 @@ impl Default for Config {
             captcha: HCaptchaConfig::default(),
             table_posts: PostsConfig::default(),
             table_views: ViewsConfig::default(),
+            media_dir: PathBufD::new(),
+            snowflake_server_id: 1234567890,
         }
     }
 }

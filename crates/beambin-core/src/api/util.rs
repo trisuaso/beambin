@@ -6,6 +6,7 @@ use axum::{
     routing::get,
     Router,
 };
+use pathbufd::PathBufD;
 use serde::{Deserialize, Serialize};
 use std::{fs::File, io::Read};
 
@@ -16,10 +17,10 @@ pub fn routes(database: Database) -> Router {
         .with_state(database.clone())
 }
 
-pub fn read_image(static_dir: String, image: String) -> Vec<u8> {
+pub fn read_image(static_dir: PathBufD, image: String) -> Vec<u8> {
     let mut bytes = Vec::new();
 
-    for byte in File::open(format!("{static_dir}/images/{image}"))
+    for byte in File::open(static_dir.extend(&["images", image.as_str()]))
         .unwrap()
         .bytes()
     {

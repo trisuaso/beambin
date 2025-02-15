@@ -5,7 +5,7 @@ use axum::{
 };
 
 use serde::{Deserialize, Serialize};
-use databeam::DefaultReturn;
+use databeam::prelude::DefaultReturn;
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub enum ViewMode {

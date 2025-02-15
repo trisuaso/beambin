@@ -7,24 +7,29 @@ version = "1.0.2"
 edition = "2021"
 
 [features]
-postgres = ["beambin-core/postgres"]
-mysql = ["beambin-core/mysql"]
-sqlite = ["beambin-core/sqlite"]
-default = ["beambin-core/sqlite"]
+postgres = ["beambin-core/postgres", "databeam/postgres"]
+mysql = ["beambin-core/mysql", "databeam/mysql"]
+sqlite = ["beambin-core/sqlite", "databeam/sqlite"]
+redis = ["beambin-core/redis", "databeam/redis"]
+moka = ["beambin-core/moka", "databeam/moka"]
+mimalloc = ["dep:mimalloc"]
+default = ["beambin-core/sqlite", "redis"]
 
 [dependencies]
-axum = "0.7.5"
-axum-macros = "0.4.1"
-serde = { version = "1.0.203", features = ["derive"] }
-serde_json = "1.0.117"
-tokio = { version = "1.38.0", features = ["macros", "rt-multi-thread"] }
-tower-http = { version = "0.5.2", features = ["fs", "trace"] }
+axum = "0.8.1"
+axum-macros = "0.5.0"
+serde = { version = "1.0.217", features = ["derive"] }
+serde_json = "1.0.138"
+tokio = { version = "1.43.0", features = ["macros", "rt-multi-thread"] }
+tower-http = { version = "0.6.2", features = ["fs", "trace"] }
 askama = { version = "0.12.1", features = ["with-axum"] }
 askama_axum = "0.4.0"
 beambin-core = { path = "../beambin-core", default-features = false }
-axum-extra = { version = "0.9.3", features = ["cookie"] }
-regex = "1.10.5"
-rainbeam-shared = "0.1.3"
-databeam = { version = "0.1.1", default-features = false }
-tracing = "0.1.40"
-tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
+axum-extra = { version = "0.10.0", features = ["cookie"] }
+regex = "1.11.1"
+rainbeam-shared = "0.2.0"
+databeam = { version = "1.0.0", default-features = false }
+tracing = "0.1.41"
+tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
+mimalloc = { version = "0.1.43", optional = true }
+pathbufd = "0.1.4"

@@ -10,7 +10,7 @@ use axum_extra::extract::CookieJar;
 use serde::{Serialize, Deserialize};
 
 use beambin_core::{
-    auth::{Permission, Profile},
+    auth::Profile,
     config::Config,
     database::Database,
     model::{DatabaseError, Post},
@@ -21,9 +21,9 @@ pub fn routes(database: Database) -> Router {
     Router::new()
         .route("/", get(homepage))
         // post
-        .route("/:slug/edit/config", get(config_editor_request))
-        .route("/:slug/edit", get(editor_request))
-        .route("/:slug", get(view_post_request))
+        .route("/{slug}/edit/config", get(config_editor_request))
+        .route("/{slug}/edit", get(editor_request))
+        .route("/{slug}", get(view_post_request))
         // ...
         .route("/api/v0/render", post(render_markdown))
         .with_state(database)
@@ -227,7 +227,7 @@ pub async fn editor_request(
             Err(_) => return Html(DatabaseError::Other.to_string()),
         };
 
-        group.permissions.contains(&Permission::Manager)
+        group.permissions.check_manager()
     } else {
         false
     };
@@ -331,7 +331,7 @@ pub async fn config_editor_request(
             Err(_) => return Html(DatabaseError::Other.to_string()),
         };
 
-        group.permissions.contains(&Permission::Manager)
+        group.permissions.check_manager()
     } else {
         false
     };

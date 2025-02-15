@@ -2,7 +2,6 @@ use axum::routing::get_service;
 use axum::Router;
 
 use databeam::config::Config as DataConf;
-use rainbeam_shared::fs;
 
 use tower_http::trace::{self, TraceLayer};
 use tracing::{info, Level};
@@ -13,14 +12,20 @@ pub use beambin_core::model;
 pub use beambin_core::config;
 pub use beambin_core::api;
 
+// mimalloc
+#[cfg(feature = "mimalloc")]
+use mimalloc::MiMalloc;
+
+#[cfg(feature = "mimalloc")]
+#[global_allocator]
+static GLOBAL: MiMalloc = MiMalloc;
+
+// ...
 #[tokio::main]
 async fn main() {
     let mut config = config::Config::get_config();
 
-    let c = fs::canonicalize(".").unwrap();
-    let here = c.to_str().unwrap();
-
-    let static_dir = format!("{here}/.config/static");
+    let static_dir = pathbufd::PathBufD::current().extend(&[".config", "static"]);
     config.static_dir = static_dir.clone();
 
     tracing_subscriber::fmt()
@@ -38,10 +43,9 @@ async fn main() {
             real_ip_header: config.real_ip_header.clone(),
             static_dir: config.static_dir.clone(),
             host: config.host.clone(),
-            citrus_id: String::new(),
+            media_dir: config.media_dir.clone(),
             blocked_hosts: config.blocked_hosts.clone(),
-            // secure: config.secure.clone(),
-            secure: true,
+            snowflake_server_id: config.snowflake_server_id.clone(),
         },
     )
     .await;
@@ -57,7 +61,7 @@ async fn main() {
 
     // ...
     let app = Router::new()
-        .nest("/", pages::routes(database.clone()))
+        .merge(pages::routes(database.clone()))
         .nest("/api/v1/posts", api::posts::routes(database.clone()))
         .nest("/api/v0/util", api::util::routes(database.clone()))
         .nest("/api/v0/auth", beambin_core::authapi::routes(auth_database))

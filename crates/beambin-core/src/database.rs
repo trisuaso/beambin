@@ -5,14 +5,14 @@ use authbeam::model::Profile;
 use reqwest::Client as HttpClient;
 
 use databeam::utility;
-use databeam::query as sqlquery;
+use databeam::{query as sqlquery, prelude::*};
 
 pub type Result<T> = std::result::Result<T, DatabaseError>;
 
 /// Database connector
 #[derive(Clone)]
 pub struct Database {
-    pub base: databeam::StarterDatabase,
+    pub base: StarterDatabase,
     pub auth: authbeam::Database,
     pub config: Config,
     pub http: HttpClient,
@@ -26,7 +26,7 @@ impl Database {
         config: Config,
     ) -> Self {
         Self {
-            base: databeam::StarterDatabase::new(database_options).await,
+            base: StarterDatabase::new(database_options).await,
             auth,
             config,
             http: HttpClient::new(),
@@ -119,7 +119,7 @@ impl Database {
             .fetch_one(c)
             .await
         {
-            Ok(p) => self.base.textify_row(p, Vec::new()).0,
+            Ok(p) => self.base.textify_row(p).0,
             Err(_) => return Err(DatabaseError::NotFound),
         };
 
@@ -398,10 +398,7 @@ impl Database {
             };
 
             if ua.id != existing.context.owner {
-                if !group
-                    .permissions
-                    .contains(&authbeam::model::Permission::Manager)
-                {
+                if !group.permissions.check_manager() {
                     // check password, not paste owner
                     if utility::hash(password) != existing.password {
                         return Err(DatabaseError::PasswordIncorrect);
@@ -514,10 +511,7 @@ impl Database {
             };
 
             if ua.id != existing.context.owner {
-                if !group
-                    .permissions
-                    .contains(&authbeam::model::Permission::Manager)
-                {
+                if !group.permissions.check_manager() {
                     // check password, not paste owner
                     if utility::hash(password) != existing.password {
                         return Err(DatabaseError::PasswordIncorrect);
@@ -644,10 +638,7 @@ impl Database {
             };
 
             if ua.id != existing.context.owner {
-                if !group
-                    .permissions
-                    .contains(&authbeam::model::Permission::Manager)
-                {
+                if !group.permissions.check_manager() {
                     // check password, not paste owner
                     if utility::hash(password) != existing.password {
                         return Err(DatabaseError::PasswordIncorrect);
